@@ -60,11 +60,11 @@ case $feat_type in
   *) echo "Invalid feature type $feat_type" && exit 1;
 esac
 
-if [ ! -z "$transform_dir" ]; then # add transforms to features...
-  #echo "Using fMLLR transforms from $transform_dir"
-  [ ! -f $transform_dir/trans.1 ] && echo "Expected $transform_dir/trans.1 to exist." && exit 1
-  feats="$feats transform-feats --utt2spk=ark:$sdata/JOB/utt2spk \"ark:cat $transform_dir/trans.* |\" ark:- ark:- |"
-fi
+#if [ ! -z "$transform_dir" ]; then # add transforms to features...
+#  #echo "Using fMLLR transforms from $transform_dir"
+#  [ ! -f $transform_dir/trans.1 ] && echo "Expected $transform_dir/trans.1 to exist." && exit 1
+#  feats="$feats transform-feats --utt2spk=ark:$sdata/JOB/utt2spk \"ark:cat $transform_dir/trans.* |\" ark:- ark:- |"
+#fi
 
 # prepare the dir
 cp $srcdata/* $data 2>/dev/null; rm $data/{feats,cmvn}.scp;
