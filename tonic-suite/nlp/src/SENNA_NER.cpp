@@ -66,10 +66,38 @@ int *SENNA_NER_forward(SENNA_NER *ner, const int *sentence_words,
   } else {
     float loss;
     vector<Blob<float> *> in_blobs = app.net->input_blobs();
+    // write input to file
+    for(int batch=0; batch<28; batch++){
+      std::ostringstream fname_ss;
+      fname_ss << "./input-ner/" << batch << ".in";
+      std::string fname = fname_ss.str();
+      std::cout<<fname<<std::endl;
+      std::ofstream input_file(fname.c_str());
+      input_file << "1 375 1 1" << "\n";
+      for(int ofst=0; ofst<375; ofst++){
+        input_file << ((float*)app.pl.data)[batch*375+ofst] << "\n";  
+      }
+      input_file.close();
+    }
+
     in_blobs[0]->set_cpu_data((float *)app.pl.data);
     vector<Blob<float> *> out_blobs = app.net->ForwardPrefilled(&loss);
     memcpy((ner->output_state), out_blobs[0]->cpu_data(),
            app.pl.num * (ner->output_state_size) * sizeof(float));
+    
+    std::cout<< app.pl.num << std::endl;
+    // write output to file
+    for(int batch=0; batch < 28; batch++){
+      std::ostringstream fname_ss;
+      fname_ss << "./output-ner/" << batch << ".out";
+      std::string fname = fname_ss.str();
+      std::ofstream output_file(fname.c_str());
+      output_file << "1 17 1 1"<<"\n";
+      for(int ofst=0; ofst<17; ofst++){
+        output_file << ((float*)(out_blobs[0]->cpu_data()))[batch*17+ofst]<<"\n";    
+      }
+      output_file.close();
+    }
   }
 
   ner->labels = SENNA_realloc(ner->labels, sizeof(int), app.pl.num);

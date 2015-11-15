@@ -62,10 +62,36 @@ int *SENNA_POS_forward(SENNA_POS *pos, const int *sentence_words,
   } else {
     float loss;
     vector<Blob<float> *> in_blobs = app.net->input_blobs();
+    // write input to file
+    for(int batch=0; batch<28; batch++){
+      std::ostringstream fname_ss;
+      fname_ss << "./input-pos/" << batch << ".in";
+      std::string fname = fname_ss.str();
+      std::cout<<fname<<std::endl;
+      std::ofstream input_file(fname.c_str());
+      input_file << "1 300 1 1" << "\n";
+      for(int ofst=0; ofst<300; ofst++){
+        input_file << ((float*)app.pl.data)[batch*300+ofst] << "\n";  
+      }
+      input_file.close();
+    }
     in_blobs[0]->set_cpu_data((float *)app.pl.data);
     vector<Blob<float> *> out_blobs = app.net->ForwardPrefilled(&loss);
     memcpy((pos->output_state), out_blobs[0]->cpu_data(),
            app.pl.num * (pos->output_state_size) * sizeof(float));
+    
+    // write output to file
+    for(int batch=0; batch < 28; batch++){
+      std::ostringstream fname_ss;
+      fname_ss << "./output-pos/" << batch << ".out";
+      std::string fname = fname_ss.str();
+      std::ofstream output_file(fname.c_str());
+      output_file << "1 45 1 1"<<"\n";
+      for(int ofst=0; ofst<45; ofst++){
+        output_file << ((float*)(out_blobs[0]->cpu_data()))[batch*45+ofst]<<"\n";    
+      }
+      output_file.close();
+    }
   }
 
   pos->labels = SENNA_realloc(pos->labels, sizeof(int), app.pl.num);

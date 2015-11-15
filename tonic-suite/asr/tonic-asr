@@ -17,7 +17,8 @@ data_dir=$data_fmllr/local # Target directory to be decoded
 graph_dir=exp/tri3b/
 dnn_dir=exp/djinn_decode/
 target_dir=$dnn_dir/decode_local
-spk=DeepBlue-20121003-jmk
+#spk=DeepBlue-20121003-jmk
+spk=yassin-20081218-ujk
 
 # arguments to pass in
 djinn=0 # Use DjiNN service ?
@@ -27,7 +28,7 @@ common=../../../../../common/
 network=asr.prototxt
 weight=asr.caffemodel
 input=asr-list.txt
-gpu=0 # Use GPU for local inference ?
+gpu=1 # Use GPU for local inference ?
 
 . parse_options.sh || exit 1;
 # Prepare data
@@ -35,11 +36,12 @@ gpu=0 # Use GPU for local inference ?
 # NOTE: remove the input file already in there
 #rm ${root_dataset}/selected/${spk}/wav/*
 
-input=../../../${input}
-
-while read line;do
-  cp ../../../${line} ${root_dataset}/selected/${spk}/wav/
-done < ${input}
+# rm -rf data/*
+#input=../../../${input}
+#
+#while read line;do
+#  cp ../../../${line} ${root_dataset}/selected/${spk}/wav/
+#done < ${input}
 
 local/voxforge_data_prep.sh ${root_dataset}/selected
 

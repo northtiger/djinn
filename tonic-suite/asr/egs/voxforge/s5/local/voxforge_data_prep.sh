@@ -12,7 +12,7 @@ source path.sh
 #echo "--- Making test/train data split ..."
 
 # The number of speakers in the test set
-nspk_test=1
+nspk_test=2
 
 . utils/parse_options.sh
 
@@ -45,6 +45,8 @@ nspk_all=$(wc -l <$loctmp/speakers_all.txt)
 #  exit 1;
 #fi
 
+echo $nspk_all
+
 utils/shuffle_list.pl <$loctmp/speakers_all.txt | head -n $nspk_test | sort -u >$loctmp/speakers_test.txt
 
 gawk 'NR==FNR{spk[$0]; next} !($0 in spk)' \
@@ -73,6 +75,7 @@ for s in test; do
  #echo "--- Preparing wav.scp, trans.txt and utt2spk ..." 
  while read d; do
   spkname=`echo $d | cut -f1 -d'-'`;
+  echo $spkname
   spksfx=`echo $d | cut -f2- -d'-'`; # | sed -e 's:_:\-:g'`;
   idpfx="${spkname}-${spksfx}";
   dir=${DATA}/$d

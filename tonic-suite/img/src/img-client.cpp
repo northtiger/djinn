@@ -23,7 +23,6 @@
 #include "opencv2/opencv.hpp"
 #include "boost/program_options.hpp"
 #include "caffe/caffe.hpp"
-#include "align.h"
 #include "socket.h"
 #include "tonic.h"
 
@@ -140,6 +139,8 @@ int main(int argc, char** argv) {
     else
       img = imread(img_file);
 
+    std::ofstream image_file("image.out");
+    image_file << img << std::endl;
     if (img.channels() * img.rows * img.cols != app.pl.size)
       LOG(ERROR) << "Skipping " << img_file
                  << ", resize to correct dimensions.\n";
@@ -153,15 +154,15 @@ int main(int argc, char** argv) {
 
   vector<pair<string, Mat> >::iterator it;
   // align facial recognition image
-  if (app.task == "face" && vm["align"].as<bool>()) {
-    for (it = imgs.begin(); it != imgs.end(); ++it) {
-      LOG(INFO) << "Aligning: " << it->first << endl;
-      preprocess(it->second, vm["flandmark"].as<string>(),
-                 vm["haar"].as<string>());
-      // comment in save + view aligned image
-      // imwrite(it->first+"_a", it->second);
-    }
-  }
+//  if (app.task == "face" && vm["align"].as<bool>()) {
+//    for (it = imgs.begin(); it != imgs.end(); ++it) {
+//      LOG(INFO) << "Aligning: " << it->first << endl;
+//      preprocess(it->second, vm["flandmark"].as<string>(),
+//                 vm["haar"].as<string>());
+//      // comment in save + view aligned image
+//      // imwrite(it->first+"_a", it->second);
+//    }
+//  }
 
   // prepare data into array
   app.pl.data = (float*)malloc(app.pl.num * app.pl.size * sizeof(float));

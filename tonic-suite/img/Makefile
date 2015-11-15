@@ -2,7 +2,7 @@ COMMON=../../common
 include $(COMMON)/Makefile.config
 
 CXX = g++
-CXX_FLAGS  = -O3 \
+CXX_FLAGS  = -g \
 						 $(INCLUDE_DIRS) \
 						 -fpermissive \
 						 -I$(COMMON)/include \
@@ -16,8 +16,7 @@ endif
 LINK_FLAGS = $(LIBRARY_DIRS) \
 						 -lopencv_core \
 						 -lopencv_highgui \
-						 -lopencv_imgproc \
-						 -lopencv_objdetect \
+						 -lopencv_imgcodecs \
 						 $(COMMON)/libtonic.a \
 						 libflandmark_static.a \
 						 -lboost_program_options \

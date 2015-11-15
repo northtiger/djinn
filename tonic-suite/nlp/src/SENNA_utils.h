@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <sstream>
+#include <string>
 
 /* messaging */
 void SENNA_error(const char *fmt, ...);
