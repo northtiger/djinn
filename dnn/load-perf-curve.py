@@ -63,6 +63,7 @@ for app in apps:
     idx += 1
 
   ax1.set_ylabel("Latency(ms)")
+  ax1.set_xticks(x_values)
   ax1.set_xticklabels(procs)
   ax1.legend(loc="upper left")
 
