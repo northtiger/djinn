@@ -31,10 +31,11 @@ def get_reg(filename, name):
     
     print "Not found"
 
-def active ( profl, rcsvs, apps ):
+def active ( profl, rcsvs, apps, batch, in_dim, out_dim ):
     outname = 'active.csv'
-    writer = csv.writer(open(outname, 'w'))
-    writer.writerow(['app','batch','ratio'])
+    writer = csv.writer(open(outname, 'a'))
+    if os.stat(outname).st_size == 0:
+      writer.writerow(['app', 'batch', 'in_dim', 'out_dim','achieved','theoretical', 'ratio'])
 
     # get average for metric
     for app in apps:
@@ -44,9 +45,11 @@ def active ( profl, rcsvs, apps ):
                 continue
 
             # batch = get_num(re.findall(r'\d+', filename))
-            batch = 1
+            #batch = 1
             dur = 0
             occ = []
+            ach_occ = []
+            th_occs = []
             with open(filename, 'rb') as f:
                 data = csv.DictReader(f)
                 for row in data:
@@ -56,18 +59,25 @@ def active ( profl, rcsvs, apps ):
                         avg = get_num(row["Avg_x"])
                         if re.search("%", row["Avg_x"]): # if value is 0-100
                             avg = get_num(row["Avg_x"])/100
+                        ach_occ.append(float(avg)*float(row["Time(%)"]))
+                        th_occs.append(float(th_occ)*float(row["Time(%)"]))
                         occ.append(float(avg/th_occ)*float(row["Time(%)"]))
                         dur += float(row["Time(%)"])
-            agg.append((int(batch), sum(occ)/float(dur)))
+            agg.append((int(batch), int(in_dim),int(out_dim), sum(ach_occ)/float(dur), sum(th_occs)/float(dur), sum(occ)/float(dur)))
         agg.sort()
         for rat in agg:
-            writer.writerow([app, rat[0], rat[1]])
+            writer.writerow([app, rat[0], rat[1], rat[2], rat[3], rat[4], rat[5]])
                 
 # arg 1 = list of csvs
-# arg 2 = app
+# arg 2 = load simulator input dimension
+# arg 3 = load simulator output dimension
 def main( args ):
     # apps = ['imc', 'asr']
-    apps = ['imc']
+    batch = args[2]
+    in_dim = args[3]
+    out_dim = args[4]
+
+    apps = ['load']
 
     # collect csvs
     csvs = [ line.strip() for line in open(args[1]) ] # rm /n
@@ -101,7 +111,7 @@ def main( args ):
         p_csv = p_csv.merge(d_csv, left_on='Kernel', right_on='Name', how='outer')
         p_csv.to_csv(p, sep=",")
 
-    active(profl, regl, apps)
+    active(profl, regl, apps, batch, in_dim, out_dim)
 
     return 0
 

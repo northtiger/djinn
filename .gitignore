@@ -45,7 +45,11 @@ asr/kaldi_patch.sh
 */log/*
 *.csv
 *.txt
+*.eps
+*.png
+*.temp
 
 # makefiles
 */Makefile
 */Makefile.config
+

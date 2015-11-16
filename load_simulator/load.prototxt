@@ -1,13 +1,13 @@
-name: 'FcTestNetwork' 
+name: 'LoadSimNetwork'
 layer { 
   name: 'data' 
   type: 'DummyData' 
   dummy_data_param { 
     shape { 
+      dim: 512
+      dim: 512 
       dim: 1
-      dim: 1 
-      dim: 32 
-      dim: 32 
+      dim: 1
     } 
     data_filler { 
       type: 'gaussian' 
@@ -20,7 +20,7 @@ layer {
   name: 'innerproduct' 
   type: 'InnerProduct' 
   inner_product_param { 
-    num_output: 128
+    num_output: 512
     weight_filler { 
       type: 'gaussian' 
       std: 0.01 

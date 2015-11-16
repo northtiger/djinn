@@ -1,8 +1,8 @@
-CAFFE=/home/jahausw/tools/caffe/distribute
-CUDA=/usr/local/cuda
+CAFFE=/home/ypkang/git/caffe-mobile/distribute
+CUDA=/home/ypkang/lib/cuda-6.5
 CXX = g++
 CXX_FLAGS = -w -fpermissive -I$(CAFFE)/include -I$(CUDA)/include -O3
-LINK_FLAGS = -L/$(CUDA)/lib \
+LINK_FLAGS = -L$(CUDA)/lib64 \
 			 -lcudart \
 			 $(CAFFE)/lib/libcaffe.so \
 			 -lpthread \

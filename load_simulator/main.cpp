@@ -44,9 +44,10 @@ po::variables_map parse_opts( int ac, char** av )
         // Options for local setup
         ("network,n", po::value<string>()->default_value("dummy.prototxt"), "DNN network to use in this experiment")
         ("input,i", po::value<string>()->default_value("undefined"), "Input to the DNN")
-        ("trial,r", po::value<int>()->default_value("1"), "number of trials")
+        ("trial,r", po::value<int>()->default_value(1), "number of trials")
         ("threads,t", po::value<int>()->default_value(1), "CPU threads used (default: 0)")
         ("layer_csv,l", po::value<string>()->default_value("NO_LAYER"), "CSV file to put layer latencies in.")
+        ("app_csv,a", po::value<string>()->default_value("NO_APP"), "CSV file to put app latencies in.")
         ;
 
     po::variables_map vm;
@@ -83,11 +84,32 @@ int main(int argc , char *argv[])
       std::cerr<<"Infinte looping a FC layer to keep the GPU at a certain utilization"<<std::endl;
       // infinite loop to keep the GPU at a certain utilization
       while(true){
-        net->ForwardPrefilled(&loss, vm["layer_csv"].as<string>());
+        //net->ForwardPrefilled(&loss, vm["layer_csv"].as<string>());
+        net->ForwardPrefilled(&loss, "NO_LAYER");
       }
     }
+
+    struct timeval start,end,diff;
+    gettimeofday(&start, NULL);
     for(int i = 0; i < vm["trial"].as<int>(); i++)
-      net->ForwardPrefilled(&loss, vm["layer_csv"].as<string>());
+      //net->ForwardPrefilled(&loss, vm["layer_csv"].as<string>());
+      net->ForwardPrefilled(&loss, "NO_LAYER");
+
+    gettimeofday(&end, NULL);
+    timersub(&end, &start, &diff);
+    float runtime = (double)diff.tv_sec*(double)1000 + (double)diff.tv_usec/(double)1000;
+
+    std::ofstream csv;
+    csv.open(vm["layer_csv"].as<string>().c_str(), ios::out | ios::app);
+
+    if(!csv.is_open()){
+      std::cerr<<"CSV file cant be opened"<<std::endl;
+      exit(1);
+    }
     
+    char out_str[100];
+    sprintf(out_str, "%.4f\n", runtime);
+    csv<<out_str;
+    csv.close();
     return 0;
 }

@@ -17,11 +17,13 @@
 #include <sys/stat.h>
 
 #include "boost/program_options.hpp" 
+#include "boost/filesystem.hpp"
 #include "socket.h"
 #include "thread.h"
 
 using namespace std;
 namespace po = boost::program_options;
+namespace fs = boost::filesystem;
 
 std::string csv_file_name;
 pthread_mutex_t csv_lock;
@@ -281,14 +283,16 @@ int main(int argc , char *argv[])
       
       bool layer_timing = false;
       if(layer_csv != "NO_LAYER"){
-        layer_csv = "/home/ypkang/brainiac/dnn/" + layer_csv;
+        // get absolute path to pass to caffe
+        fs::path rel_csv(layer_csv);
+        fs::path abs_csv = fs::complete(rel_csv);
+        layer_csv = abs_csv.string();
         layer_timing = true;
       }
 
       if(vm["transfer"].as<bool>()){
         // Include data transfer time in timing
         LOG(INFO) << "Data transfer time included";
-        gettimeofday(&start, NULL);
   
         for(int it = 0; it < trial; it++){
           // Touching all the input data again to make sure no caching effect
@@ -299,6 +303,7 @@ int main(int argc , char *argv[])
 
           in_blobs[0]->set_cpu_data(input);
          
+          gettimeofday(&start, NULL);
           // Tell caffe to transfer data to GPU 
           if(vm["gpu"].as<bool>())
             in_blobs[0]->gpu_data(); 
@@ -311,12 +316,12 @@ int main(int argc , char *argv[])
  
           // Copy output back
           memcpy(output, out_blobs[0]->cpu_data(), sizeof(float));
-        }
+          gettimeofday(&end, NULL);
+          timersub(&end, &start, &diff);
 
-        gettimeofday(&end, NULL);
-        timersub(&end, &start, &diff);
-        total_runtime = (double)diff.tv_sec*(double)1000 
+          total_runtime += (double)diff.tv_sec*(double)1000 
                           + (double)diff.tv_usec/(double)1000;
+        }
       }else{
         // Exclude data transfer time in timing
         LOG(INFO) << "Data transfer time excluded.";
