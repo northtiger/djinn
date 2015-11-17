@@ -19,6 +19,7 @@
 #include "boost/program_options.hpp" 
 
 #include "caffe/caffe.hpp"
+#include "caffe/net.hpp"
 
 using caffe::Blob;
 using caffe::Caffe;
@@ -27,10 +28,26 @@ using caffe::Layer;
 using caffe::shared_ptr;
 using caffe::Timer;
 using caffe::vector;
+using caffe::Net;
 
 using namespace std;
 namespace po = boost::program_options;
 
+namespace caffe {
+template <typename Dtype>
+class LoadSim : public Net<Dtype> {
+  public:
+  Dtype LoopLayer(int idx, int loop){
+    if(loop == 0){
+      std::cerr<<"Infinte looping layer "<<this->layers_[idx]->name()<<" to keep the GPU at a certain utilization."<<std::endl;
+      while(true){
+        this->layers_[1]->Forward(this->bottom_vecs_[1], this->top_vecs_[1]);
+      }
+    }
+  }
+};
+
+}
 
 po::variables_map parse_opts( int ac, char** av )
 {
@@ -76,19 +93,13 @@ int main(int argc , char *argv[])
     }
 
     vector<Blob<float>*> bottom;
-    Net<float>* net = new Net<float>(vm["network"].as<string>().c_str(), phase);
+    caffe::LoadSim<float>* net = new Net<float>(vm["network"].as<string>().c_str(), phase);
     float loss;
-    net->ForwardPrefilled(&loss);
-    
-    if(vm["trial"].as<int>() == 0){
-      std::cerr<<"Infinte looping a FC layer to keep the GPU at a certain utilization"<<std::endl;
-      // infinite loop to keep the GPU at a certain utilization
-      while(true){
-        //net->ForwardPrefilled(&loss, vm["layer_csv"].as<string>());
-        net->ForwardPrefilled(&loss, "NO_LAYER");
-      }
-    }
 
+    net->ForwardPrefilled(&loss);
+    net->LoopLayer(1,0);
+    
+    /*
     struct timeval start,end,diff;
     gettimeofday(&start, NULL);
     for(int i = 0; i < vm["trial"].as<int>(); i++)
@@ -111,5 +122,6 @@ int main(int argc , char *argv[])
     sprintf(out_str, "%.4f\n", runtime);
     csv<<out_str;
     csv.close();
+    */
     return 0;
 }
