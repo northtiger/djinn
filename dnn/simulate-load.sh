@@ -1,17 +1,16 @@
-in_dim=512
-out_dim=512
+in_dim=1024
+out_dim=1024
 #BATCHLIST=($(seq 0 16 512))
 #BATCHLIST[0]=1
-BATCHLIST=(512)
-PROCESSES=($(seq 1 1 15))
+BATCHLIST=(1024)
+PROCESSES=($(seq 1 1 16))
 
-echo ${PROCESSES[@]}
-
-TRIAL=10
+TRIAL=200
 LOADSIMDIR=../load_simulator
 pwd=$PWD
 apps=("imc" "dig" "dig-10" "face" "vgg" "asr" "pos" "chk" "ner")
 #apps=("imc")
+#export CUDA_MPS_PIPE_DIRECTORY="/tmp/mps_7"
 OUTPUTDIR=server-load-timing
 for batch in ${BATCHLIST[@]}; do
   for proc in ${PROCESSES[@]}; do
@@ -20,7 +19,7 @@ for batch in ${BATCHLIST[@]}; do
     LOADGEN_PID_LIST=($())
     for p in $(seq 1 1 ${proc}); do
       # Start FC layer processes to infinite looping to generate load
-      ./load-simulator --network load.prototxt --trial 0 --gpu 1 & 
+      taskset -c 23 ./load-simulator --network load.prototxt --trial 0 --gpu 1 & 
       # save the PIDs so that we can kill them later
       PREV_PID=$!
       LOADGEN_PID_LIST[$p]=$PREV_PID
@@ -29,9 +28,9 @@ for batch in ${BATCHLIST[@]}; do
     sleep 5
     # run the actual process
     for app in ${apps[@]}; do
-       layer_timing=${OUTPUTDIR}/${app}-${batch}-${proc}-layer-timing.csv
-       timing=${OUTPUTDIR}/${app}-${batch}-${proc}-timing.csv
-      ./layer_run.sh ${app} 1 1 ${timing} ${TRIAL} ${layer_timing}
+      layer_timing=${OUTPUTDIR}/${app}-${batch}-${proc}-layer-timing.csv
+      timing=${OUTPUTDIR}/${app}-${batch}-${proc}-timing.csv
+      taskset -c 23 ./layer_run.sh ${app} 1 1 ${timing} ${TRIAL} ${layer_timing}
       sleep 1
     done # for app
     

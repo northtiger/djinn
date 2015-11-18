@@ -23,8 +23,8 @@ def color_maker(count, map='gnuplot2', min=0.100, max=0.900):
 
 
 apps=["imc", "dig", "face", "vgg", "asr", "pos", "ner", "chk"]
-batch=512
-procs=range(1,16)
+batch=1024
+procs=range(1,20)
 dirname="server-load-timing"
 
 for app in apps:
@@ -56,7 +56,7 @@ for app in apps:
 
   x_values = procs 
 
-  colors = color_maker(len(layers), map="afmhot")
+  colors = color_maker(len(layers), map="hot")
   idx=0
   for key,value in layers.iteritems():
     ax1.plot(x_values, value, linewidth=width, color=colors[idx], label=key)
@@ -65,10 +65,10 @@ for app in apps:
   ax1.set_ylabel("Latency(ms)")
   ax1.set_xticks(x_values)
   ax1.set_xticklabels(procs)
-  ax1.legend(loc="upper left")
+  ax1.legend(loc="center", ncol=5, bbox_to_anchor=(0.5,1.20))
 
   import os
-  figname = "-".join((app, 'server', 'load'))
+  figname = dirname + "/" + "-".join((app, 'server', 'load'))
   plt.savefig(figname+'.eps', bbox_inches="tight")
   os.popen('convert '+figname+'.eps ' +figname+'.png')
 

@@ -278,6 +278,7 @@ int main(int argc , char *argv[])
       LOG(INFO) << "Perform inference for " << trial << " times to average over.";
       struct timeval start, end, diff;
       float total_runtime = 0;
+      std::vector<float> total_runtime_list;
 
       std::string layer_csv = vm["layer_csv"].as<string>();
       
@@ -319,8 +320,10 @@ int main(int argc , char *argv[])
           gettimeofday(&end, NULL);
           timersub(&end, &start, &diff);
 
-          total_runtime += (double)diff.tv_sec*(double)1000 
-                          + (double)diff.tv_usec/(double)1000;
+          total_runtime_list.push_back((double)diff.tv_sec*(double)1000 
+                          + (double)diff.tv_usec/(double)1000);
+          //total_runtime += (double)diff.tv_sec*(double)1000 
+          //               + (double)diff.tv_usec/(double)1000;
         }
       }else{
         // Exclude data transfer time in timing
@@ -399,20 +402,35 @@ int main(int argc , char *argv[])
       }
 
       // Print info
-      char info[100];
-      if(verbose){
-        sprintf(info, "%s,%s,%d,%s,%.4f\n",network.c_str(),
-                                              platform.c_str(),
-                                              openblas_threads,
-                                              cpufreq.c_str(),
-                                              avg_runtime);
-      }else{
-        sprintf(info, "%s,%s,%.4f\n",network.c_str(),
-                                      platform.c_str(),
-                                      avg_runtime);
-      }
+      // char info[100];
+      // if(verbose){
+      //   sprintf(info, "%s,%s,%d,%s,%.4f\n",network.c_str(),
+      //                                         platform.c_str(),
+      //                                         openblas_threads,
+      //                                         cpufreq.c_str(),
+      //                                         avg_runtime);
+      // }else{
+      //   sprintf(info, "%s,%s,%.4f\n",network.c_str(),
+      //                                 platform.c_str(),
+      //                                 avg_runtime);
+      // }
 
-      csv << info;
+      // csv << info;
+      for(int runtime_idx = 0; runtime_idx < total_runtime_list.size(); runtime_idx++){
+        char info[100];
+        if(verbose){
+          sprintf(info, "%s,%s,%d,%s,%.4f\n",network.c_str(),
+                                                platform.c_str(),
+                                                openblas_threads,
+                                                cpufreq.c_str(),
+                                                total_runtime_list[runtime_idx]);
+        }else{
+          sprintf(info, "%s,%s,%.4f\n",network.c_str(),
+                                        platform.c_str(),
+                                        total_runtime_list[runtime_idx]);
+        }
+        csv << info;
+      }
 
       csv.close();
       // End of local experiment setup

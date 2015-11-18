@@ -38,11 +38,21 @@ template <typename Dtype>
 class LoadSim : public Net<Dtype> {
   public:
   Dtype LoopLayer(int idx, int loop){
+    struct timeval start,end,diff;
     if(loop == 0){
       std::cerr<<"Infinte looping layer "<<this->layers_[idx]->name()<<" to keep the GPU at a certain utilization."<<std::endl;
       while(true){
-        this->layers_[1]->Forward(this->bottom_vecs_[1], this->top_vecs_[1]);
+        this->layers_[idx]->Forward(this->bottom_vecs_[idx], this->top_vecs_[idx]);
       }
+    }else{
+      for(int i=0; i < loop; i++)
+        gettimeofday(&start, NULL);
+        this->layers_[idx]->Forward(this->bottom_vecs_[idx], this->top_vecs_[idx]);
+        cudaDeviceSynchronize();
+        gettimeofday(&end, NULL);
+        timersub(&end, &start, &diff);
+        float lat = (double)diff.tv_sec*(double)1000 + (double)diff.tv_usec/(double)1000;
+        std::cerr<<lat<<std::endl;
     }
   }
 };
@@ -97,7 +107,7 @@ int main(int argc , char *argv[])
     float loss;
 
     net->ForwardPrefilled(&loss);
-    net->LoopLayer(1,0);
+    net->LoopLayer(1,vm["trial"].as<int>());
     
     /*
     struct timeval start,end,diff;
