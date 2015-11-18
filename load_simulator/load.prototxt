@@ -4,8 +4,8 @@ layer {
   type: 'DummyData' 
   dummy_data_param { 
     shape { 
-      dim: 512
-      dim: 512 
+      dim: 1024
+      dim: 1024
       dim: 1
       dim: 1
     } 
@@ -20,15 +20,12 @@ layer {
   name: 'innerproduct' 
   type: 'InnerProduct' 
   inner_product_param { 
-    num_output: 512
+    num_output: 1024
     weight_filler { 
       type: 'gaussian' 
       std: 0.01 
     } 
-    bias_filler { 
-      type: 'constant' 
-      value: 0 
-    } 
+    bias_term: false
   } 
   bottom: 'data' 
   top: 'innerproduct' 

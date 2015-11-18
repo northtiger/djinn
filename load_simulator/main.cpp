@@ -45,7 +45,7 @@ class LoadSim : public Net<Dtype> {
         this->layers_[idx]->Forward(this->bottom_vecs_[idx], this->top_vecs_[idx]);
       }
     }else{
-      for(int i=0; i < loop; i++)
+      for(int i=0; i<loop; i++){
         gettimeofday(&start, NULL);
         this->layers_[idx]->Forward(this->bottom_vecs_[idx], this->top_vecs_[idx]);
         cudaDeviceSynchronize();
@@ -53,12 +53,11 @@ class LoadSim : public Net<Dtype> {
         timersub(&end, &start, &diff);
         float lat = (double)diff.tv_sec*(double)1000 + (double)diff.tv_usec/(double)1000;
         std::cerr<<lat<<std::endl;
+      }
     }
   }
 };
-
 }
-
 po::variables_map parse_opts( int ac, char** av )
 {
     // Declare the supported options.
